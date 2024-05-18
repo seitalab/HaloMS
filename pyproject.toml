@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "HaloMS"
+version = "0.1.0"
+description = ""
+authors = ["takashi-yamanashi"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+numpy = "1.23.3"
+scanpy = "^1.9.3"
+jupyterlab = "^3.6.3"
+plotly = "^5.14.1"
+python-igraph = "^0.10.4"
+louvain = "^0.8.0"
+ipywidgets = "^8.0.6"
+kaleido = "0.2.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
