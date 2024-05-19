@@ -1,7 +1,3 @@
-以下に修正した内容を記載します。
-
----
-
 # Mapping Adipocyte Interactome Networks with HALOTAG Enrichment Mass Spectrometry
 
 This repository provides the methodology used in our study to visualize latent variables and protein interaction scores for protein structures using AlphaFold2-based Localcolabfold.
