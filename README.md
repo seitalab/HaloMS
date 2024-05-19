@@ -36,6 +36,6 @@ $ poetry install
 
 1. **Dimensionality Reduction and Visualization**  
    Using UMAP, reduce the dimensionality of the latent variables to two dimensions for interacting proteins with each bait protein used in the Halo-MS method. Visualize these reduced variables together with the interaction scores.
-   (`visualization/makefig_adsc.ipynb`)
+   (Run : `visualization/makefig_adsc.ipynb` / Results : `figures`)
 
    \*Note: The figure generated here is used in the paper.
