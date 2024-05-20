@@ -12,11 +12,11 @@ import plotly.graph_objs as go
 from plotly.offline import plot, init_notebook_mode
 
 
-emb_name = '../analysis/data/project_af2_mono__emb.csv'
-full_res = '../analysis/data/adsc_af2_score_full_lists.csv'
-Kegg_list_path = '../analysis/data/adsc_kegg_lists.csv'
-adata_output = '../analysis/data/adata_adsc.h5ad'
-bait_list = "../analysis/data/bait_list.csv"
+emb_name = '../data/project_af2_mono__emb.csv'
+full_res = '../data/adsc_af2_score_full_lists.csv'
+Kegg_list_path = '../data/adsc_kegg_lists.csv'
+adata_output = '../data/adata_adsc.h5ad'
+bait_list = "../data/bait_list.csv"
 
 
 
