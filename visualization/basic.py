@@ -21,16 +21,6 @@ def basic_input(input_file):
     
     return adata
     
-    
-def basic_computing(adata):
-    seed=0
-    sc.tl.pca(adata, random_state=seed)
-    sc.pp.neighbors(adata, n_neighbors=15)
-    sc.tl.umap(adata, random_state=seed)
-    sc.tl.louvain(adata, random_state=seed) 
-    
-    return adata
-
 
 def easy_heatmap(adata, output_df, target, target_name, project_name, fig_num):
     hsa_cols = [col for col in adata.obs.columns if col.startswith('hsa')] #kegg pathway
@@ -47,11 +37,12 @@ def easy_heatmap(adata, output_df, target, target_name, project_name, fig_num):
     ax.set_yticklabels(m_hsa_df.index, rotation=90, size=60)
     ax.set_xticks(np.arange(len(m_hsa_df.columns)))
     ax.set_xticklabels(m_hsa_df.columns, rotation=90, size=80, ha="center")
-    ax.text(-0.05, 1.01, 'Figure S6-{}-B {} {}'.format(fig_num, 'Adipocyte', target_name), fontsize=120, va='bottom', ha='left', transform=ax.transAxes)
+    ax.text(-0.05, 1.01, 'Figure S7-{}-B {} {}'.format(fig_num, 'Adipocyte', target_name), fontsize=120, va='bottom', ha='left', transform=ax.transAxes)
 
     sns.heatmap(m_hsa_df, cmap=cmap, ax=ax, cbar=False)
     plt.subplots_adjust(left=0.15, right=0.85, bottom=0.15, top=0.85)
     plt.savefig("../figures/{}/heatmap_results/{}.pdf".format(project_name, target), bbox_inches="tight")
+    plt.close()
 
 def easy_dendrogram(adata, target, target_name, project_name, fig_num):
     a_euc = linkage(adata.X, metric = 'euclidean', method = 'single')
@@ -67,11 +58,12 @@ def easy_dendrogram(adata, target, target_name, project_name, fig_num):
     output_df.to_csv("../figures/{}/dendrogram_results/{}_sorted_gene_names.csv".format(project_name, target), index=False)
 
     plt.tick_params(bottom=False, labelbottom=False)
-    plt.title('Figure S6-{}-C {} {}'.format(fig_num, 'Adipocyte', target_name), fontsize=16, ha='left', va='top', x=-0.1, y=1.02)
+    plt.title('Figure S7-{}-C {} {}'.format(fig_num, 'Adipocyte', target_name), fontsize=16, ha='left', va='top', x=-0.1, y=1.02)
     
     plt.subplots_adjust(top=0.95)  # Add this line to adjust the top margin.
     plt.savefig("../figures/{}/dendrogram_results/{}.pdf".format(project_name, target))
-    plt.show()
+    # plt.show()
+    plt.close()
 
 
     easy_heatmap(adata, output_df, target, target_name, project_name, fig_num)
@@ -83,29 +75,39 @@ def on_click(trace, points, state):
     display(Javascript(f"alert('{info}');"))
 
         
-def adata_target_view(adata, target, project_name, fig_num):
-    adata_target = adata[adata.obs['{}_model_1_multimer_score(iptm+ptm)'.format(target)] != 'None']
-    adata_target = adata_target[adata_target.obs['{}_model_1_multimer_score(iptm+ptm)'.format(target)] != 'error']
-    obs_copy = adata_target.obs.copy()
-    obs_copy['{}_model_1_multimer_score(iptm+ptm)'.format(target)] = obs_copy['{}_model_1_multimer_score(iptm+ptm)'.format(target)].astype('float64')
-    obs_copy['{}_model_1_multimer_score(iptm)'.format(target)] = obs_copy['{}_model_1_multimer_score(iptm)'.format(target)].astype('float64')
-    obs_copy['{}_model_1_multimer_score(ptm)'.format(target)] = obs_copy['{}_model_1_multimer_score(ptm)'.format(target)].astype('float64')
-    adata_target.obs = obs_copy
-    
-    #target only
+def adata_target_view(adata, target, project_name, fig_num, calculate_flag):
     seed=0
-    sc.tl.pca(adata_target, random_state=seed)
-    if 50 > len(adata_target):
-        sc.pp.neighbors(adata_target, n_neighbors=3)
-    else:
-        sc.pp.neighbors(adata_target, n_neighbors=4)
+    
+    if calculate_flag:
+        adata_target = adata[adata.obs['{}_model_1_multimer_score(iptm+ptm)'.format(target)] != 'None']
+        adata_target = adata_target[adata_target.obs['{}_model_1_multimer_score(iptm+ptm)'.format(target)] != 'error']
+        obs_copy = adata_target.obs.copy()
+        obs_copy['{}_model_1_multimer_score(iptm+ptm)'.format(target)] = obs_copy['{}_model_1_multimer_score(iptm+ptm)'.format(target)].astype('float64')
+        obs_copy['{}_model_1_multimer_score(iptm)'.format(target)] = obs_copy['{}_model_1_multimer_score(iptm)'.format(target)].astype('float64')
+        obs_copy['{}_model_1_multimer_score(ptm)'.format(target)] = obs_copy['{}_model_1_multimer_score(ptm)'.format(target)].astype('float64')
+        adata_target.obs = obs_copy
 
-    sc.tl.umap(adata_target, random_state=seed)
-    sc.tl.louvain(adata_target, random_state=seed) 
+        #target only
+        sc.tl.pca(adata_target, random_state=seed)
+        if 50 > len(adata_target):
+            sc.pp.neighbors(adata_target, n_neighbors=3, random_state=seed)
+        else:
+            sc.pp.neighbors(adata_target, n_neighbors=4, random_state=seed)
+
+        sc.tl.umap(adata_target, random_state=seed)
+        sc.tl.louvain(adata_target, random_state=seed) 
+        
+        #save
+        adata_target.write("../data/calculated/{}/adata_target_{}.h5ad".format(project_name, target))
+    
+    else:
+        #load
+        adata_target = sc.read("../data/calculated/{}/adata_target_{}.h5ad".format(project_name, target))
+    
     print(adata[adata.obs['ID'] == target].obs['gene_name'][0])
     gene_name =  adata[adata.obs['ID'] == target].obs['gene_name'][0]
     easy_dendrogram(adata_target, target, gene_name, project_name, fig_num)
-    print(len(adata_target))
+    print("target counts : ", len(adata_target))
 
     init_notebook_mode()
     fig = go.Figure(data=go.Scatter(x=adata_target.obsm['X_umap'][:, 0], y=adata_target.obsm['X_umap'][:, 1],mode='markers+text', text=adata_target.obs.index))
@@ -125,7 +127,7 @@ def adata_target_view(adata, target, project_name, fig_num):
             ),
             textfont=dict(color='#447ADB')
         ),layout=go.Layout(
-            title='Figure S6-{}-A {} {}'.format(fig_num, 'Adipocyte', gene_name),
+            title='Figure S7-{}-A {} {}'.format(fig_num, 'Adipocyte', gene_name),
             plot_bgcolor="white",
             xaxis=dict(linecolor='black',mirror=True, title='UMAP 1', tickfont=dict(color='white')),
             yaxis=dict(linecolor='black',mirror=True, title='UMAP 2', tickfont=dict(color='white')),
@@ -143,5 +145,6 @@ def adata_target_view(adata, target, project_name, fig_num):
     iplot(fig, filename='../figures/{}/umap_results/{}_only_umap.html'.format(project_name, target))
     
     pio.write_image(fig, '../figures/{}/umap_results/{}_only_umap.pdf'.format(project_name, target))
-
+    
+    del fig
     
